@@ -1,0 +1,26 @@
+name: projet10-ipv6
+topology:
+  nodes:
+    routeur:
+      kind: linux
+      image: frrouting/frr:latest
+    dhcp6:
+      kind: linux
+      image: kea-dhcp6:custom
+    bridge-lan:
+      kind: bridge
+    hote-a:
+      kind: linux
+      image: alpine:latest
+    hote-b:
+      kind: linux
+      image: alpine:latest
+    attaquant:
+      kind: linux
+      image: kalilinux/kali-rolling
+  links:
+    - endpoints: ["routeur:eth1", "bridge-lan:x1"]
+    - endpoints: ["dhcp6:eth1", "bridge-lan:x2"]
+    - endpoints: ["hote-a:eth1", "bridge-lan:x3"]
+    - endpoints: ["hote-b:eth1", "bridge-lan:x4"]
+    - endpoints: ["attaquant:eth1", "bridge-lan:x5"]
