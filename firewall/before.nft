@@ -1,0 +1,13 @@
+#!/usr/sbin/nft -f
+# before.nft — Etat de référence AVANT durcissement : aucune règle de
+# filtrage sur le pont. RA, DHCPv6 et ND circulent librement, y compris
+# depuis des sources non fiables. Utilisé en Phase 1 / Phase 3 pour
+# prouver que les attaques réussissent sans protection.
+
+flush ruleset
+
+table bridge filter {
+  chain forward {
+    type filter hook forward priority 0; policy accept;
+  }
+}
