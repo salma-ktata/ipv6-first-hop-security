@@ -6,7 +6,7 @@ topology:
       image: frrouting/frr:latest
     dhcp6:
       kind: linux
-      image: kea-dhcp6:custom
+      image: ubuntu:22.04
     bridge-lan:
       kind: bridge
     hote-a:
