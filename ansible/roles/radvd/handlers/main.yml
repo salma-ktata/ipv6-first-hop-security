@@ -1,0 +1,4 @@
+- name: redémarrer radvd
+  service:
+    name: radvd
+    state: restarted

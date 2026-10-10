@@ -1,0 +1,4 @@
+- name: redémarrer kea-dhcp6
+  service:
+    name: kea-dhcp6-server
+    state: restarted

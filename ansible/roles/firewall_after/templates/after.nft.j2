@@ -1,0 +1,17 @@
+#!/usr/sbin/nft -f
+table bridge filter {
+  chain forward {
+    type filter hook forward priority 0; policy accept;
+
+    icmpv6 type nd-router-advert ib != "{{ trusted_router_iface }}" drop
+    udp sport 547 ib != "{{ trusted_dhcp6_iface }}" drop
+
+    icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } \
+      ip6 saddr { ::/128, ff00::/8 } drop
+
+    icmpv6 type nd-neighbor-solicit limit rate over 20/second burst 10 packets drop
+    icmpv6 type nd-router-solicit    limit rate over 5/second drop
+
+    counter accept
+  }
+}

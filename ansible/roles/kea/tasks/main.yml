@@ -1,0 +1,36 @@
+- name: Vérifier si Python3 est présent
+  raw: which python3
+  register: python_check
+  failed_when: false
+  changed_when: false
+
+- name: Installer Python3 si absent (raw, pas besoin de Python)
+  raw: apt-get update && apt-get install -y python3
+  when: python_check.rc != 0
+
+- name: Installer Kea DHCPv6 (Ubuntu)
+  apt:
+    name:
+      - kea-dhcp6-server
+      - kea-common
+    state: present
+    update_cache: true
+
+- name: Déployer kea-dhcp6.conf
+  template:
+    src: kea-dhcp6.conf.j2
+    dest: /etc/kea/kea-dhcp6.conf
+    owner: root
+    mode: "0644"
+
+- name: Vérifier si Kea tourne déjà
+  command: pgrep kea-dhcp6
+  register: kea_running
+  failed_when: false
+  changed_when: false
+
+- name: Démarrer Kea DHCPv6
+  command: kea-dhcp6 -c /etc/kea/kea-dhcp6.conf
+  async: 999999
+  poll: 0
+  when: kea_running.rc != 0

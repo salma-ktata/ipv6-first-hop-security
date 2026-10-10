@@ -1,0 +1,13 @@
+interface {{ lan_iface }} {
+    AdvSendAdvert on;
+    MinRtrAdvInterval 30;
+    MaxRtrAdvInterval 100;
+    AdvManagedFlag off;
+    AdvOtherConfigFlag on;
+    prefix {{ lan_prefix }} {
+        AdvOnLink on;
+        AdvAutonomous on;
+        AdvValidLifetime 86400;
+        AdvPreferredLifetime 14400;
+    };
+};

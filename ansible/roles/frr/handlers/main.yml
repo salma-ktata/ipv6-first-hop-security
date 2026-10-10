@@ -1,0 +1,4 @@
+- name: redémarrer frr
+  service:
+    name: frr
+    state: restarted

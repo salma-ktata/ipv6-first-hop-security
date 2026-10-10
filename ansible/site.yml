@@ -1,0 +1,31 @@
+- name: "Phase 1 — Déployer le routeur IPv6 (radvd + FRR)"
+  hosts: routeurs
+  tags: [phase1, routeur]
+  roles:
+    - radvd
+    - frr
+
+- name: "Phase 1 — Déployer le serveur DHCPv6 (Kea)"
+  hosts: serveurs_dhcp6
+  gather_facts: false
+  tags: [phase1, dhcp6]
+  roles:
+    - kea
+
+- name: "Phase 4 — Durcir le pont (RA Guard / DHCPv6 Guard / ND)"
+  hosts: bridges
+  tags: [phase4, firewall]
+  roles:
+    - firewall_after
+
+- name: "Phase 4 — Durcir l'adressage et le cache de voisins (hôtes)"
+  hosts: hotes
+  tags: [phase4, hardening]
+  roles:
+    - hardening
+
+- name: "Remettre le pont en état vulnérable (pour re-tester un scénario)"
+  hosts: bridges
+  tags: [reset, vulnerable]
+  roles:
+    - firewall_before

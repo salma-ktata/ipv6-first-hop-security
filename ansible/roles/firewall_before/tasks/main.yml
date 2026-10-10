@@ -1,0 +1,10 @@
+- name: Vider la table bridge filter (état vulnérable de référence)
+  command: nft flush table bridge filter
+  failed_when: false
+  changed_when: true
+
+- name: S'assurer que nftables est présent (mais inactif pour ce rôle)
+  apt:
+    name: nftables
+    state: present
+    update_cache: true

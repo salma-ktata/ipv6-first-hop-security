@@ -1,0 +1,15 @@
+{
+  "Dhcp6": {
+    "interfaces-config": { "interfaces": [ "{{ lan_iface }}" ] },
+    "lease-database": { "type": "memfile", "persist": true },
+    "subnet6": [
+      {
+        "subnet": "{{ hostvars['routeur']['lan_prefix'] }}",
+        "pools": [ { "pool": "{{ hostvars['routeur']['lan_prefix'].split('/')[0] }}1000-{{ hostvars['routeur']['lan_prefix'].split('/')[0] }}2000" } ],
+        "option-data": [
+          { "name": "dns-servers", "data": "{{ hostvars['routeur']['lan_prefix'].split('/')[0] }}53" }
+        ]
+      }
+    ]
+  }
+}

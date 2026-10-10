@@ -1,0 +1,29 @@
+- name: Adresses temporaires RFC 8981 (confidentialité)
+  sysctl:
+    name: "net.ipv6.conf.{{ lan_iface }}.use_tempaddr"
+    value: "2"
+    sysctl_set: true
+
+- name: Adresses stables semi-opaques RFC 7217
+  sysctl:
+    name: "net.ipv6.conf.{{ lan_iface }}.addr_gen_mode"
+    value: "3"
+    sysctl_set: true
+
+- name: Dimensionnement du cache de voisins — seuil 1
+  sysctl:
+    name: net.ipv6.neigh.default.gc_thresh1
+    value: "512"
+    sysctl_set: true
+
+- name: Dimensionnement du cache de voisins — seuil 2
+  sysctl:
+    name: net.ipv6.neigh.default.gc_thresh2
+    value: "1024"
+    sysctl_set: true
+
+- name: Dimensionnement du cache de voisins — seuil 3
+  sysctl:
+    name: net.ipv6.neigh.default.gc_thresh3
+    value: "2048"
+    sysctl_set: true
