@@ -1,0 +1,6 @@
+# Containerlab generated state, inventories, certificates, and node metadata.
+topo/clab-projet10-ipv6/
+
+# Private keys and certificates must be generated locally.
+*.key
+*.pem
