@@ -17,7 +17,7 @@
     mode: "0644"
 
 - name: Activer le transfert IPv6
-  sysctl:
+  ansible.posix.sysctl:
     name: net.ipv6.conf.all.forwarding
     value: "1"
     sysctl_set: true
