@@ -4,3 +4,8 @@ horodatage,phase,scenario,voisins_cache,routes_defaut,adresses_globales,latence_
 2026-11-10 09:49:56,avant,na_mitm,4,3,2,0.082,0.107,0
 2026-11-10 09:53:43,avant,dhcpv6_pirate,4,3,2,0.097,0.141,0
 2026-11-10 10:02:57,avant,saturation_cache,4,3,2,0.063,0.071,0
+2026-11-10 10:22:05,apres,ra_frauduleux,4,2,4,0.097,0.127,0
+2026-11-10 10:22:06,apres,na_mitm,4,2,4,0.096,0.153,0
+2026-11-10 10:22:08,apres,dhcpv6_pirate,4,2,4,0.110,0.185,0
+2026-11-10 10:22:09,apres,saturation_cache,4,2,4,0.199,0.549,0
+2026-11-10 10:41:59,apres,bypass_exthdr_frag,4,2,3,0.110,0.200,0
