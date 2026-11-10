@@ -1,4 +1,1 @@
-2026-10-11T08:30:55+00:00,avant,reference,0
-0,0
-0,NA,"
-NA"
+timestamp,phase,scenario,node,interface,neighbor_entries,incomplete_entries,ping_avg_ms

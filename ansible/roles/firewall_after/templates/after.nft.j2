@@ -1,17 +1,25 @@
-#!/usr/sbin/nft -f
-table bridge filter {
-  chain forward {
-    type filter hook forward priority 0; policy accept;
 
-    icmpv6 type nd-router-advert ib != "{{ trusted_router_iface }}" drop
-    udp sport 547 ib != "{{ trusted_dhcp6_iface }}" drop
+table bridge {{ table_name | default('ipv6_fhs') }} {
 
-    icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } \
-      ip6 saddr { ::/128, ff00::/8 } drop
+    chain forward {
+        type filter hook forward priority filter; policy accept;
 
-    icmpv6 type nd-neighbor-solicit limit rate over 20/second burst 10 packets drop
-    icmpv6 type nd-router-solicit    limit rate over 5/second drop
+        # Source validation on dedicated attacker port
+        iifname "{{ attacker_iface }}" ip6 saddr != fe80::/10 counter drop comment "SOURCE_GUARD_ATTACKER_PORT"
 
-    counter accept
-  }
+        # Block ND injection from attacker port
+        iifname "{{ attacker_iface }}" icmpv6 type { nd-router-solicit, nd-neighbor-solicit, nd-neighbor-advert } counter drop comment "ND_GUARD_ATTACKER_PORT"
+
+        # RA Guard
+        iifname != "{{ trusted_router_iface }}" icmpv6 type nd-router-advert counter drop comment "RA_GUARD"
+
+        # DHCPv6 Guard
+        iifname != "{{ trusted_dhcp6_iface }}" udp sport 547 counter drop comment "DHCPV6_GUARD"
+
+        # Rate-limit NS from legitimate client ports
+        iifname { "{{ client_a_iface }}", "{{ client_b_iface }}" } icmpv6 type nd-neighbor-solicit limit rate over 100/second burst 200 packets counter drop comment "ND_NS_RATE_LIMIT"
+
+        # Rate-limit NA from legitimate client ports
+        iifname { "{{ client_a_iface }}", "{{ client_b_iface }}" } icmpv6 type nd-neighbor-advert limit rate over 100/second burst 200 packets counter drop comment "ND_NA_RATE_LIMIT"
+    }
 }

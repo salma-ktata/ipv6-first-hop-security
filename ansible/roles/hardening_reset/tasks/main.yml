@@ -1,0 +1,23 @@
+
+- name: Restore default temporary-address behavior
+  sysctl:
+    name: "net.ipv6.conf.{{ lan_iface }}.use_tempaddr"
+    value: "0"
+    sysctl_set: true
+    reload: true
+
+
+- name: Restore default IPv6 address generation mode
+  sysctl:
+    name: "net.ipv6.conf.{{ lan_iface }}.addr_gen_mode"
+    value: "0"
+    sysctl_set: true
+    reload: true
+
+
+- name: Re-enable acceptance of unsolicited Neighbor Advertisements
+  sysctl:
+    name: "net.ipv6.conf.{{ lan_iface }}.drop_unsolicited_na"
+    value: "0"
+    sysctl_set: true
+    reload: true

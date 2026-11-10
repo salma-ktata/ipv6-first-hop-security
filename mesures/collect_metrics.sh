@@ -1,28 +1,60 @@
-#!/bin/sh
-set -eu
 
-PHASE="${1:?usage: collect_metrics.sh <avant|apres> <scenario>}"
-SCENARIO="${2:?usage: collect_metrics.sh <avant|apres> <scenario>}"
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PHASE="${1:?Usage: collect_metrics.sh <avant|apres> <scenario>}"
+SCENARIO="${2:?Scenario required}"
+
 IFACE="${IFACE:-eth1}"
-CSV="$(dirname "$0")/indicateurs.csv"
+PING_TARGET="${PING_TARGET:-2001:db8:10:1::1}"
+NODE="${NODE:-$(hostname)}"
 
-if [ ! -f "$CSV" ]; then
-    echo "horodatage,phase,scenario,taille_cache_voisins,entrees_incomplete,latence_ms,compteurs_nftables" > "$CSV"
+CSV="${CSV:-$(dirname "$0")/indicateurs.csv}"
+
+mkdir -p "$(dirname "$CSV")"
+
+if [ ! -s "$CSV" ]; then
+    echo "timestamp,phase,scenario,node,interface,neighbor_entries,incomplete_entries,ping_avg_ms" > "$CSV"
 fi
 
-TS="$(date -Iseconds)"
+TIMESTAMP="$(date -Iseconds)"
 
-CACHE_SIZE=$(ip -6 neigh show dev "$IFACE" 2>/dev/null | wc -l || echo 0)
-INCOMPLETE=$(ip -6 neigh show dev "$IFACE" 2>/dev/null | grep -c INCOMPLETE || echo 0)
+# Neighbor-cache measurements
+NEIGHBORS="$(ip -6 neigh show dev "$IFACE" 2>/dev/null || true)"
 
-ROUTER_ADDR="${ROUTER_ADDR:-2001:db8:10:1::1}"
-LATENCY=$(ping6 -c 5 -q "$ROUTER_ADDR" 2>/dev/null \
-    | awk -F'/' '/min\/avg\/max/ {print $5}' || echo "NA")
+TOTAL="$(printf '%s\n' "$NEIGHBORS" |
+    awk 'NF {n++} END {print n+0}')"
 
-COUNTERS=$(nft -a list table bridge filter 2>/dev/null \
-    | grep -oE 'comment "[^"]+".*counter packets [0-9]+' \
-    | awk -F'packets ' '{print $2}' | paste -sd ';' - || echo "NA")
+INCOMPLETE="$(printf '%s\n' "$NEIGHBORS" |
+    awk '$NF == "INCOMPLETE" {n++} END {print n+0}')"
 
-echo "${TS},${PHASE},${SCENARIO},${CACHE_SIZE},${INCOMPLETE},${LATENCY},\"${COUNTERS}\"" >> "$CSV"
+# Connectivity measurement
+PING_OUTPUT="$(ping -6 -c 3 -W 1 "$PING_TARGET" 2>&1 || true)"
 
-echo "Mesure enregistree: phase=${PHASE} scenario=${SCENARIO} cache=${CACHE_SIZE} incomplete=${INCOMPLETE} latence=${LATENCY}ms"
+PING_AVG="$(printf '%s\n' "$PING_OUTPUT" |
+    sed -nE 's/.* = [0-9.]+\/([0-9.]+)\/.*/\1/p' |
+    tail -n 1)"
+
+if [ -z "$PING_AVG" ]; then
+    PING_AVG="NA"
+fi
+
+# CSV output
+printf '"%s","%s","%s","%s","%s",%s,%s,%s\n' \
+    "$TIMESTAMP" \
+    "$PHASE" \
+    "$SCENARIO" \
+    "$NODE" \
+    "$IFACE" \
+    "$TOTAL" \
+    "$INCOMPLETE" \
+    "$PING_AVG" >> "$CSV"
+
+echo "Measurement completed"
+echo "Phase: $PHASE"
+echo "Scenario: $SCENARIO"
+echo "Node: $NODE"
+echo "Neighbor entries: $TOTAL"
+echo "Incomplete entries: $INCOMPLETE"
+echo "Average latency: $PING_AVG ms"

@@ -1,34 +1,65 @@
-- name: Installer nftables
-  apt:
+
+- name: Ensure nftables is installed on the host
+  package:
     name: nftables
     state: present
-    update_cache: true
 
-- name: Déployer after.nft (RA Guard / DHCPv6 Guard / filtrage ND)
-  template:
-    src: after.nft.j2
-    dest: /etc/nftables.d/after.nft
-    mode: "0644"
-
-- name: Déployer anti_bypass.nft
-  copy:
-    src: ../../../firewall/anti_bypass.nft
-    dest: /etc/nftables.d/anti_bypass.nft
-    mode: "0644"
-
-- name: Charger after.nft
-  command: nft -f /etc/nftables.d/after.nft
-  changed_when: true
-
-- name: Charger anti_bypass.nft
-  command: nft -f /etc/nftables.d/anti_bypass.nft
-  changed_when: true
-
-- name: Vérifier que les règles sont bien chargées
-  command: nft list table bridge filter
-  register: nft_check
+- name: Verify that the Containerlab bridge exists
+  command: ip link show dev {{ bridge_name }}
   changed_when: false
 
-- name: Afficher le ruleset chargé
+- name: Identify ports connected to the bridge
+  command: ip -o link show master {{ bridge_name }}
+  register: bridge_members
+  changed_when: false
+
+- name: Verify expected bridge ports
+  assert:
+    that:
+      - trusted_router_iface in bridge_members.stdout
+      - trusted_dhcp6_iface in bridge_members.stdout
+      - client_a_iface in bridge_members.stdout
+      - client_b_iface in bridge_members.stdout
+      - attacker_iface in bridge_members.stdout
+    fail_msg: >
+      One or more expected ports are missing.
+      Check Containerlab deployment and bridge membership.
+
+- name: Render a temporary ruleset for syntax validation
+  template:
+    src: after.nft.j2
+    dest: /tmp/ipv6-fhs-check.nft
+    mode: "0600"
+  vars:
+    table_name: ipv6_fhs_check
+
+- name: Validate nftables syntax without applying rules
+  command: nft -c -f /tmp/ipv6-fhs-check.nft
+  changed_when: false
+
+- name: Render the actual ruleset
+  template:
+    src: after.nft.j2
+    dest: /tmp/ipv6-fhs.nft
+    mode: "0600"
+  vars:
+    table_name: ipv6_fhs
+
+- name: Remove the previous project table only
+  command: nft delete table bridge ipv6_fhs
+  register: delete_old_table
+  failed_when: false
+  changed_when: delete_old_table.rc == 0
+
+- name: Apply the new project ruleset
+  command: nft -f /tmp/ipv6-fhs.nft
+  changed_when: true
+
+- name: Verify loaded rules
+  command: nft list table bridge ipv6_fhs
+  register: loaded_rules
+  changed_when: false
+
+- name: Display ruleset
   debug:
-    var: nft_check.stdout_lines
+    var: loaded_rules.stdout_lines
