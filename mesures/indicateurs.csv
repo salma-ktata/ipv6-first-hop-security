@@ -1,4 +1,2 @@
-2026-10-11T08:30:55+00:00,avant,reference,0
-0,0
-0,NA,"
-NA"
+horodatage,phase,scenario,voisins_cache,routes_defaut,adresses_globales,latence_moy_ms,latence_max_ms,perte_pct
+2026-11-10 09:38:48,avant,reference,4,2,2,0.079,0.104,0
