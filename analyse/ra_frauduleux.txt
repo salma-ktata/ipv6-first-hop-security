@@ -1,0 +1,10 @@
+    1   0.000000     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    2   1.001058     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    3   2.003731     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    4   3.005403     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    5   4.006204     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    6   5.008874     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    7   6.009796     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    8   7.011524     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+    9   8.012575     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66
+   10   9.013708     fe80::66 → ff02::1      ICMPv6 110 Router Advertisement from 02:00:00:00:00:66

@@ -5,9 +5,7 @@ ANSIBLE_DIR = Path(__file__).parent
 PLAYBOOK = ANSIBLE_DIR / "site.yml"
 PHASES = {
     "vulnerable": ["phase1"],
-    "harden": ["phase4"],
-    "reset": ["reset"],
-    "all": ["phase1", "phase4"],
+    "all": ["phase1"],
 }
 
 def run_tags(tags, check=False):
