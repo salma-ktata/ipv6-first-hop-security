@@ -46,10 +46,10 @@ durcissement, puis par sa **disparition** après. Les fichiers de preuve sont in
 
 ### 3.1 RA frauduleux — **neutralisé**
 - **Avant :** l'attaquant émet des Router Advertisement annonçant le préfixe pirate
-  `2001:db8:bad::/64` (capture `analyse/attaque_ra_bloquee.pcap`, 10 trames, cf. §6).
+  `2001:db8:bad::/64` (capture `analyse/attaque_ra_bloquee.pcap`, 10 trames, cf. section 7).
 - **Après :** aucune route via `2001:db8:bad::` n'est installée côté victime
   (`analyse/route_victime_apres.txt`) ; la règle **RA Guard** rejette les RA émis depuis un
-  port non fiable (**compteur = 40**, §4).
+  port non fiable (**compteur = 40**, section 4).
 
 ### 3.2 Usurpation NA / MITM — **neutralisée**
 - **Avant** (`analyse/m2_neigh_avant.txt`) : après amorçage du dialogue hôte-à-hôte, le
@@ -65,7 +65,7 @@ durcissement, puis par sa **disparition** après. Les fichiers de preuve sont in
   `udhcpc6: IPv6 obtained, lease time 600` (adresse du préfixe pirate
   `2001:db8:bad::1000`). Le pirate attribue donc réellement une adresse.
 - **Après** : la règle **DHCPv6 Guard** (`udp sport 547 iifname != x2 drop`) rejette les
-  réponses serveur issues d'un port non fiable (**compteur = 2**, §4) ; la victime n'obtient
+  réponses serveur issues d'un port non fiable (**compteur = 2**, section 4) ; la victime n'obtient
   plus de bail pirate.
 
 > Remarque : la capture automatisée côté pont (`m1_pirate_addr_avant.txt`) n'a pas
@@ -78,7 +78,7 @@ durcissement, puis par sa **disparition** après. Les fichiers de preuve sont in
   (×52) — saturation démontrée.
 - **Après** (`analyse/m3_cache_routeur_apres.txt`) : sous le même flood, le cache
   **décroît de 622 à 223** (les entrées résiduelles expirent, le nouveau flood est
-  absorbé par la limitation de débit NS — **6 032 paquets rejetés**, §4).
+  absorbé par la limitation de débit NS — **6 032 paquets rejetés**, section 4).
 
 ### 3.5 Contournement ext-hdr / fragmentation — **sans effet**
 - **Avant** (`analyse/m4_route_avant.txt`) : même **sans protection**, le RA encapsulé /
@@ -87,7 +87,7 @@ durcissement, puis par sa **disparition** après. Les fichiers de preuve sont in
   malformés.
 - **Après** : les règles anti-contournement (`ip6 nexthdr ipv6-frag drop` et
   `ip6 nexthdr {hopopt,dstopts,route} … drop`, RFC 6980) rejettent ces paquets par
-  précaution (**compteurs = 20 + 20**, §4).
+  précaution (**compteurs = 20 + 20**, section 4).
 
 ### Synthèse
 
@@ -125,13 +125,13 @@ rejette les RA frauduleux (évalués sur chaque port aval du pont — le nombre 
 l'anti-contournement (**20 + 20**) rejette les RA fragmentés et encapsulés, et la
 limitation de débit NS (**6 032**) absorbe le flood de saturation. La règle `accept`
 (**3 476** paquets légitimes) confirme que le trafic normal continue de passer (cohérent
-avec la non-régression, §5).
+avec la non-régression, section 5).
 
 **Filtrage ND compatible DAD.** La règle ND est séparée : seules les NS/NA à source
 **multicast** (`ff00::/8`) et les NA à source **non spécifiée** (`::`) sont rejetées ; les
 **NS de source `::` (Duplicate Address Detection) sont volontairement autorisées**, afin
 de ne pas casser la détection d'adresse dupliquée des hôtes — ce qui explique l'absence de
-faux positif (§5).
+faux positif (section 5).
 
 Le durcissement de l'adressage (sysctl) complète le pare-feu : adresses temporaires
 RFC 8981 (`use_tempaddr=2`), adresses stables RFC 7217 (`addr_gen_mode=3`) et
@@ -147,7 +147,7 @@ Source `analyse/non_regression.txt` — après durcissement :
 
 **Code de sortie : `0` → aucun faux positif.** Le trafic légitime (RA du vrai routeur,
 SLAAC, joignabilité) reste pleinement fonctionnel, ce que confirme la règle `accept`
-(1 636 paquets légitimes passés, §4).
+(1 636 paquets légitimes passés, section 4).
 
 **Adressage victime** (`analyse/adressage_victime.txt`) : trois adresses globales, toutes
 dans le préfixe légitime `2001:db8:10:1::/64` — une stable (`…fee9:8d95`, RFC 7217) et
@@ -155,7 +155,45 @@ deux temporaires (RFC 8981) — **aucune adresse `2001:db8:bad::` ni adresse de 
 pirate**. La variation du compteur `adresses_globales` (1 à la référence, puis plus)
 s'explique uniquement par la génération d'adresses temporaires, non par une attaque.
 
-## 6. Analyse Wireshark
+## 6. Détection des anomalies (dossier `detection/`)
+
+Au-delà du blocage, deux sondes passives écoutent le pont `bridge-lan` et **lèvent une
+alerte en temps réel** dès qu'une attaque se produit. Elles sont indépendantes du
+pare-feu : elles **observent** le trafic (scapy) et ne le filtrent pas, ce qui permet de
+démontrer la détection même sur le LAN non protégé. Preuves sauvegardées dans `analyse/`.
+
+### 6.1 Détecteur de flood NS (`detection/ns_flood_detector.py`)
+Compte les Neighbor Solicitation par fenêtre glissante et alerte au-delà du seuil
+(100 NS / 5 s). Sous l'attaque de saturation ciblant le routeur
+(`analyse/detection_ns_flood.txt`) :
+
+```
+Detecteur NS-flood a l'ecoute sur bridge-lan (seuil 100 NS / 5s).
+[ALERTE] flood NS : 100 NS en 5s (dernier src fe80::b964:7471:5a97:2f77)
+```
+
+Les sources aléatoires (`fe80::b964:…`) caractérisent le flood ; l'alerte confirme que
+l'attaque est **observable** et **détectable** indépendamment de la limitation de débit.
+
+### 6.2 Détecteur de DHCPv6 pirate (`detection/dhcpv6_rogue_detector.py`)
+Surveille les messages serveur DHCPv6 (Advertise / Reply) et alerte dès qu'ils
+proviennent d'une **MAC autre que le serveur Kea de confiance**. Sous l'attaque du serveur
+pirate (`analyse/detection_dhcpv6.txt`) :
+
+```
+Detecteur DHCPv6-pirate a l'ecoute sur bridge-lan (MAC de confiance aa:c1:ab:1f:d3:a0).
+[ALERTE] DHCPv6 pirate : Advertise depuis MAC 02:00:00:00:00:66 (IP fe80::66) != Kea aa:c1:ab:1f:d3:a0
+```
+
+L'alerte identifie précisément la **MAC usurpatrice** (`02:00:00:00:00:66`) face à la MAC
+légitime, fournissant une piste exploitable pour la réponse à incident.
+
+**Complémentarité détection / blocage.** Les règles nftables (section 4) **empêchent**
+l'attaque ; les sondes `detection/` la **signalent**. Ensemble, elles couvrent à la fois
+la prévention et la supervision — une alerte reste émise même si une règle venait à être
+désactivée, offrant une défense en profondeur.
+
+## 7. Analyse Wireshark
 
 Capture `analyse/attaque_ra_bloquee.pcap` (résumés `analyse/resume_protocoles.txt`,
 `analyse/ra_frauduleux.txt`) :
@@ -165,11 +203,11 @@ Capture `analyse/attaque_ra_bloquee.pcap` (résumés `analyse/resume_protocoles.
 - **Détail (`icmpv6.type==134`)** : 10 Router Advertisement, source `fe80::66`, MAC
   `02:00:00:00:00:66`, à intervalle ~1 s, annonçant le préfixe pirate.
 - **Corrélation** : ces RA sont **émis** mais **sans effet** côté victime après
-  durcissement (aucune route `2001:db8:bad::`), ce que confirme §3.1.
+  durcissement (aucune route `2001:db8:bad::`), ce que confirme section 3.1.
 - Filtres complémentaires : `icmpv6.type==135 || icmpv6.type==136` (NS/NA),
   `udp.port==547` (DHCPv6).
 
-## 7. Indicateurs demandés
+## 8. Indicateurs demandés
 
 | Indicateur | Résultat |
 | --- | --- |
@@ -177,16 +215,19 @@ Capture `analyse/attaque_ra_bloquee.pcap` (résumés `analyse/resume_protocoles.
 | Taux de blocage (compteurs nftables) | RA Guard 40, DHCPv6 Guard 2, anti-bypass 20+20, limite NS 6 032 |
 | Contournement (ext-hdr / fragmentation) | sans effet même sans protection ; rejeté par précaution |
 | Faux positifs (RA légitimes bloqués) | **0** (non-régression = 0 ; DAD préservé) |
+| Détection temps réel (sondes `detection/`) | **2 / 2** : flood NS et DHCPv6 pirate alertés (section 6) |
 | Taille du cache sous attaque | routeur **12 → 622** (avant), **absorbé** (après) |
 | Impact sur la latence | sub-milliseconde ; **0 % de perte** ; écarts non significatifs (M8) |
 
-## 8. Conclusion et limites
+## 9. Conclusion et limites
 
 Le durcissement du premier saut **neutralise les quatre attaques démontrées** (RA
 frauduleux, usurpation NA, DHCPv6 pirate, saturation du cache) **sans aucun faux
 positif**. Les contre-mesures sont appliquées sur le pont de la VM hôte via `harden.sh` :
 `firewall/after.nft` (RA Guard, DHCPv6 Guard, filtrage ND, limitation de débit,
-anti-contournement) et durcissement de l'adressage RFC 7217/8981 + cache de voisins.
+anti-contournement) et durcissement de l'adressage RFC 7217/8981 + cache de voisins. Deux
+sondes passives (`detection/`) complètent le dispositif en **signalant** les attaques en
+temps réel (défense en profondeur : prévention + supervision).
 
 **Limites (assumées) :**
 - **Mesure unique par scénario d'attaque** (hors référence 3× M8) : les écarts de latence

@@ -1,0 +1,2 @@
+Detecteur NS-flood a l'ecoute sur bridge-lan (seuil 100 NS / 5s). Ctrl+C pour arreter.
+[ALERTE] flood NS : 100 NS en 5s (dernier src fe80::b964:7471:5a97:2f77)

@@ -1,0 +1,4 @@
+Detecteur DHCPv6-pirate a l'ecoute sur bridge-lan (MAC de confiance aa:c1:ab:1f:d3:a0). Ctrl+C pour arreter.
+[ALERTE] DHCPv6 pirate : Advertise depuis MAC 02:00:00:00:00:66 (IP fe80::66) != Kea aa:c1:ab:1f:d3:a0
+[ALERTE] DHCPv6 pirate : Advertise depuis MAC 02:00:00:00:00:66 (IP fe80::66) != Kea aa:c1:ab:1f:d3:a0
+[ALERTE] DHCPv6 pirate : Advertise depuis MAC 02:00:00:00:00:66 (IP fe80::66) != Kea aa:c1:ab:1f:d3:a0
