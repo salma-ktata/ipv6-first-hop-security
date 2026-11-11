@@ -1,0 +1,4 @@
+horodatage,phase,scenario,voisins_cache,routes_defaut,adresses_globales,latence_moy_ms,latence_max_ms,perte_pct
+2026-11-11 09:45:53,avant,reference,4,2,3,0.343,1.444,0
+2026-11-11 09:45:55,avant,reference,4,2,3,0.094,0.153,0
+2026-11-11 09:45:58,avant,reference,4,2,3,0.559,2.259,0

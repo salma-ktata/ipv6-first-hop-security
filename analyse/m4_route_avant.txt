@@ -1,0 +1,2 @@
+default via 3fff:172:20:20::1 dev eth0  metric 1024 
+default via fe80::a8c1:abff:fef3:abdc dev eth1  metric 1024  expires 0sec

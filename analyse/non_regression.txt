@@ -1,0 +1,8 @@
+[1/3] Adresse SLAAC legitime (2001:db8:10:1:...) presente sur clab-projet10-ipv6-hote-a ?
+      OK : adresse SLAAC legitime presente
+[2/3] Route par defaut legitime presente ?
+      OK : route par defaut presente
+[3/3] Routeur 2001:db8:10:1::1 joignable ?
+      OK : ping routeur reussi
+NON-REGRESSION : OK - aucun faux positif, le trafic legitime passe toujours.
+exit=0

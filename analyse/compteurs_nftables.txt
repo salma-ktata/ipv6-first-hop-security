@@ -1,15 +1,16 @@
-table bridge filter { # handle 12
+table bridge filter { # handle 27
 	chain forward { # handle 1
 		type filter hook forward priority 0; policy accept;
-		ip6 nexthdr ipv6-frag counter packets 20 bytes 2080 drop comment "anti-bypass: ND fragmente (RFC 6980)" # handle 2
+		ip6 nexthdr ipv6-frag counter packets 20 bytes 2080 drop comment "anti-bypass: tous fragments IPv6 (RFC 6980)" # handle 2
 		ip6 nexthdr { ip, ipv6-route, ipv6-opts } icmpv6 type nd-router-advert iifname != "x1" counter packets 20 bytes 2080 drop comment "anti-bypass: RA via ext-header" # handle 4
 		ip6 nexthdr { ip, ipv6-route, ipv6-opts } udp sport 547 iifname != "x2" counter packets 0 bytes 0 drop comment "anti-bypass: DHCPv6 via ext-header" # handle 6
 		ip6 nexthdr { ip, ipv6-route, ipv6-opts } counter packets 0 bytes 0 log prefix "ND-EXTHDR-SUSPECT: " drop comment "anti-bypass: ext-header suspect" # handle 8
 		icmpv6 type nd-router-advert iifname != "x1" counter packets 40 bytes 3840 drop comment "RA Guard" # handle 9
-		udp sport 547 iifname != "x2" counter packets 544 bytes 28288 drop comment "DHCPv6 Guard" # handle 10
-		icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } ip6 saddr { ::, ff00::/8 } counter packets 0 bytes 0 drop comment "ND source invalide" # handle 13
-		icmpv6 type nd-neighbor-solicit limit rate over 20/second burst 10 packets counter packets 17557 bytes 1264104 drop comment "ND limite debit NS" # handle 14
+		udp sport 547 iifname != "x2" counter packets 2 bytes 256 drop comment "DHCPv6 Guard" # handle 10
+		icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } ip6 saddr ff00::/8 counter packets 0 bytes 0 drop comment "ND source multicast invalide" # handle 12
+		icmpv6 type nd-neighbor-advert ip6 saddr :: counter packets 0 bytes 0 drop comment "NA source :: invalide" # handle 13
+		icmpv6 type nd-neighbor-solicit limit rate over 20/second burst 10 packets counter packets 6032 bytes 434304 drop comment "ND limite debit NS" # handle 14
 		icmpv6 type nd-router-solicit limit rate over 5/second burst 5 packets counter packets 0 bytes 0 drop comment "ND limite debit RS" # handle 15
-		counter packets 3659 bytes 310184 accept comment "trafic legitime" # handle 16
+		counter packets 3476 bytes 240600 accept comment "trafic legitime" # handle 16
 	}
 }

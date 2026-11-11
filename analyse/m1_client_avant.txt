@@ -1,0 +1,4 @@
+udhcpc6: started, v1.37.0
+udhcpc6: sending discover
+udhcpc6: sending select
+udhcpc6: IPv6 obtained, lease time 600

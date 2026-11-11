@@ -1,0 +1,33 @@
+RESUME DE LA CAMPAGNE DE MESURES - Projet 10
+==================================================
+
+[OK] pont bridge-lan present
+[OK] rogue_dhcpv6.py version corrigee
+[OK] scripts + outils prets dans l'attaquant
+[OK] reference mesuree 3x (M8)
+       -> voir mesures/indicateurs.csv
+[!!] M1 avant : adresse pirate proposee a la victime
+       -> non vue (voir m1_avant.pcap)
+[OK] M1 apres : adresse pirate BLOQUEE
+       -> plus d'adresse pirate + DHCPv6 Guard actif
+[OK] M2 avant : cache empoisonne (MAC attaquant)
+       -> entree -> 02:00:00:00:00:66
+[OK] M2 apres : resultat enregistre
+       -> cache propre apres durcissement
+[OK] M3 avant : cache routeur gonfle
+       -> 12 -> 622 entrees
+[OK] M3 apres : flood absorbe + compteur limite NS
+       -> 622 -> 223 entrees, compteur enregistre
+[OK] M4 reference avant enregistree
+       -> pas de route pirate (pile a ignore l'encapsulation)
+[OK] compteurs, non-regression, adressage sauvegardes
+
+Fichiers produits dans analyse/ :
+  m1_*            DHCPv6 pirate (capture + client + preuve adresse)
+  m2_neigh_*      usurpation NA (table de voisins avant/apres)
+  m3_cache_*      saturation (cache routeur avant/apres)
+  m4_route_avant  contournement (reference avant)
+  compteurs_nftables.txt, non_regression.txt, adressage_victime.txt, ...
+
+Prochaine etape : envoyer mesures/indicateurs.csv + le dossier analyse/
+pour finaliser le rapport.

@@ -1,0 +1,2 @@
+2001:db8:10:1::1 dev eth1 lladdr aa:c1:ab:f3:ab:dc router ref 1 used 0/0/0 probes 4 REACHABLE
+fe80::a8c1:abff:fef3:abdc dev eth1 lladdr aa:c1:ab:f3:ab:dc router used 0/0/0 probes 0 STALE

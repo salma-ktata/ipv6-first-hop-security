@@ -1,0 +1,11 @@
+158: eth1@if157: <BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN> mtu 9500 state UP 
+    inet6 2001:db8:10:1:a062:23a2:cee7:f1fd/64 scope global secondary dynamic 
+       valid_lft 86341sec preferred_lft 14341sec
+    inet6 2001:db8:10:1:22d:7399:ec9e:1c2f/64 scope global dynamic flags 900 
+       valid_lft 86341sec preferred_lft 14341sec
+    inet6 2001:db8:10:1:a8c1:abff:fee9:8d95/64 scope global dynamic flags 100 
+       valid_lft 85998sec preferred_lft 13998sec
+    inet6 fe80::e449:6c26:1dcd:ac96/64 scope link flags 800 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a8c1:abff:fee9:8d95/64 scope link 
+       valid_lft forever preferred_lft forever

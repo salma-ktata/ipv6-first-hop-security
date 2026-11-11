@@ -1,0 +1,4 @@
+2001:db8:10:1:a8c1:abff:fe98:8251 dev eth1  used 0/0/0 probes 3 FAILED
+2001:db8:10:1::1 dev eth1 lladdr aa:c1:ab:f3:ab:dc router used 0/0/0 probes 4 STALE
+fe80::66 dev eth1  used 0/0/0 probes 6 FAILED
+fe80::a8c1:abff:fef3:abdc dev eth1 lladdr aa:c1:ab:f3:ab:dc router used 0/0/0 probes 1 STALE

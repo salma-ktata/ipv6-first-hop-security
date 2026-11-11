@@ -1,0 +1,3 @@
+cible routeur 2001:db8:10:1::1 (aa:c1:ab:f3:ab:dc)
+avant flood : 12 entrees
+apres flood : 622 entrees

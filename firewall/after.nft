@@ -1,22 +1,27 @@
 #!/usr/sbin/nft -f
 # RA Guard / DHCPv6 Guard / filtrage ND + limitation de debit + anti-contournement.
-# Interfaces de confiance du pont : x1 = routeur, x2 = dhcp6
+# Chaque regle de blocage porte un compteur + un commentaire (rapport d'audit).
+# Filtrage ND compatible DAD (les NS de source :: sont autorisees).
+# Interfaces de confiance : x1 = routeur, x2 = dhcp6
 table bridge filter {
   chain forward {
     type filter hook forward priority 0; policy accept;
 
-    ip6 nexthdr 44 drop comment "ND fragmente rejete (RFC 6980)"
+    ip6 nexthdr 44 counter drop comment "anti-bypass: tous fragments IPv6 (RFC 6980)"
 
-    ip6 nexthdr { 0, 60, 43 } icmpv6 type nd-router-advert iifname != "x1" drop
-    ip6 nexthdr { 0, 60, 43 } udp sport 547 iifname != "x2" drop
-    ip6 nexthdr { 0, 60, 43 } log prefix "ND-EXTHDR-SUSPECT: " drop
+    ip6 nexthdr { 0, 60, 43 } icmpv6 type nd-router-advert iifname != "x1" counter drop comment "anti-bypass: RA via ext-header"
+    ip6 nexthdr { 0, 60, 43 } udp sport 547 iifname != "x2" counter drop comment "anti-bypass: DHCPv6 via ext-header"
+    ip6 nexthdr { 0, 60, 43 } counter log prefix "ND-EXTHDR-SUSPECT: " drop comment "anti-bypass: ext-header suspect"
 
-    icmpv6 type nd-router-advert iifname != "x1" drop
-    udp sport 547 iifname != "x2" drop
-    icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } ip6 saddr { ::/128, ff00::/8 } drop
-    icmpv6 type nd-neighbor-solicit limit rate over 20/second burst 10 packets drop
-    icmpv6 type nd-router-solicit limit rate over 5/second drop
+    icmpv6 type nd-router-advert iifname != "x1" counter drop comment "RA Guard"
+    udp sport 547 iifname != "x2" counter drop comment "DHCPv6 Guard"
 
-    counter accept
+    icmpv6 type { nd-neighbor-solicit, nd-neighbor-advert } ip6 saddr ff00::/8 counter drop comment "ND source multicast invalide"
+    icmpv6 type nd-neighbor-advert ip6 saddr ::/128 counter drop comment "NA source :: invalide"
+
+    icmpv6 type nd-neighbor-solicit limit rate over 20/second burst 10 packets counter drop comment "ND limite debit NS"
+    icmpv6 type nd-router-solicit limit rate over 5/second counter drop comment "ND limite debit RS"
+
+    counter accept comment "trafic legitime"
   }
 }

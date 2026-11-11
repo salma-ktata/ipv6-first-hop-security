@@ -1,0 +1,6 @@
+udhcpc6: started, v1.37.0
+udhcpc6: sending discover
+udhcpc6: sending discover
+udhcpc6: sending discover
+udhcpc failed to get a DHCP lease
+udhcpc6: no lease, failing
